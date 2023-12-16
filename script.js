@@ -20,7 +20,15 @@ const GameboardIIFE = (() => {
       eachBox.addEventListener("click", Game.handleClick);
     });
   };
-  return { render, update };
+  const update = (index, marker) => {
+    gameBoard[index] = marker;
+    render();
+  };
+  const getGameBoard = () => {
+    return gameBoard;
+  };
+
+  return { render, update, getGameBoard };
 })();
 
 const Game = (() => {
@@ -58,3 +66,78 @@ const Game = (() => {
   };
   return { start, handleClick, players };
 })();
+
+const createPlayer = (name, mark) => {
+  return {
+    name,
+    mark,
+  };
+};
+
+const DisplayPlayers = (() => {
+  const renderPlayers = (playerNames) => {
+    let pTag;
+    playerNames.forEach((eachPlayer) => {
+      pTag = document.createElement("p");
+      pTag.textContent = `${eachPlayer.name.toUpperCase()} is : ${
+        eachPlayer.mark
+      } `;
+
+      displayPlayers.appendChild(pTag);
+    });
+  };
+  return { renderPlayers };
+})();
+const MessageController = (() => {
+  const renderMessage = (message) => {
+    messageContainer.textContent = message;
+  };
+  return { renderMessage };
+})();
+
+function checkWin(board) {
+  const winnningCombination = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6],
+  ];
+  for (let i = 0; i < winnningCombination.length; i++) {
+    const [a, b, c] = winnningCombination[i];
+    console.log(board[a], board[b], board[c]);
+    if (board[a] !== "" && board[a] == board[b] && board[a] == board[c]) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function checkTie(board) {
+  return board.every((box) => box !== "");
+}
+reStart.addEventListener("click", () => {
+  startButton.disabled = false;
+  reStart.disabled = true;
+  for (let i = 0; i < 9; i++) {
+    GameboardIIFE.update(i, "");
+  }
+  GameboardIIFE.render();
+  gameOver = true;
+  displayPlayers.textContent = "";
+  firstPlayer.value = "";
+  secondPlayer.value = "";
+});
+startButton.addEventListener("click", () => {
+  reStart.disabled = false;
+  if (firstPlayer.value !== "" && secondPlayer.value !== "") {
+    Game.start();
+    startButton.disabled = true;
+    MessageController.renderMessage("");
+  } else {
+    MessageController.renderMessage("Please enter names!!");
+  }
+});
